@@ -97,6 +97,26 @@ php artisan serve
 > Accès à l’API : [http://localhost:8000](http://localhost:8000)
 
 ---
+## ▶️ Note
+
+Quelque étape pour ajouter un module dans l'api
+
+Dans providers.php, ajouter le service provider du module
+```bash
+\Diji\module\ModuleServiceProvider::class
+```
+
+Dans le composer.json, ajouter le module dans autoload
+```bash
+"autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "diji\\nom_module\\": "modules/nom_module"
+            
+        }
+    }
+```
+---
 
 ## ✅ Résumé rapide des commandes
 
