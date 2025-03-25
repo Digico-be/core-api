@@ -42,15 +42,21 @@ class VerifyDailyBankAccounts extends Command
             $daysLeft = $account ? Carbon::now()->diffInDays(Carbon::parse($account->account_expires_at)) : 0;
 
             if (in_array($daysLeft, $alertDays) || $daysLeft <= 0) {
-                $nordigenService = new NordigenService();
-                $nordigen_institution_id = \App\Models\Meta::getValue('nordigen_institution_id');
-                $response = $nordigenService->createRequisition($nordigen_institution_id);
+                try{
+                    $nordigenService = new NordigenService();
+                    $nordigen_institution_id = \App\Models\Meta::getValue('nordigen_institution_id');
+                    $response = $nordigenService->createRequisition($nordigen_institution_id);
 
-                Notification::route('mail', Meta::getValue("nordigen_admin_email"))
-                    ->notify(new RequisitionExpirationNotification($daysLeft, $response["link"]));
+                    Notification::route('mail', Meta::getValue("nordigen_admin_email"))
+                        ->notify(new RequisitionExpirationNotification($daysLeft, $response["link"]));
 
-                Log::channel('transaction')->info("Tenant : $tenant->name");
-                Log::channel('transaction')->info("Account disabled : " . $daysLeft . "Email send !");
+                    Log::channel('transaction')->info("Tenant : $tenant->name");
+                    Log::channel('transaction')->info("Account disabled : " . $daysLeft . "days. Email send !");
+                }catch (\Exception $e){
+                    Log::channel('transaction')->info("Tenant : $tenant->name");
+                    Log::channel('transaction')->info($e->getMessage());
+                    continue;
+                }
             }
         }
     }
