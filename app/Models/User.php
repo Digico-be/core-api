@@ -19,7 +19,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'firstname',
+        'lastname',
         'email',
         'password',
     ];
@@ -49,6 +50,8 @@ class User extends Authenticatable
 
     public function tenants()
     {
-        return $this->belongsToMany(Tenant::class, 'user_tenants');
+        return $this->belongsToMany(Tenant::class, 'user_tenants')
+            ->withPivot('role')
+            ->withTimestamps();
     }
 }
