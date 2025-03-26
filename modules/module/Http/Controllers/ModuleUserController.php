@@ -46,7 +46,7 @@ class ModuleUserController extends Controller
     public function modulesForUser($userId)
     {
         // Récupère tous les modules
-        $modules = \Diji\Module\Models\Module::all();
+        $modules = Module::all();
 
         // Récupère les IDs de modules liés à ce user
         $assignedModuleIds = DB::connection('tenant')
