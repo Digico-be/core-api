@@ -72,4 +72,33 @@ class UserController
         return response()->json($user);
     }
 
+    public function destroy(Request $request, User $user): JsonResponse
+    {
+        $tenantId = $request->header('X-Tenant');
+
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant manquant dans les en-têtes.'], 400);
+        }
+
+        $tenant = \App\Models\Tenant::find($tenantId);
+
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant introuvable.'], 404);
+        }
+
+        // Vérifie que l'utilisateur est bien associé à ce tenant
+        if (!$user->tenants->contains('id', $tenantId)) {
+            return response()->json(['message' => 'Cet utilisateur n\'appartient pas à ce tenant.'], 403);
+        }
+
+        // Détache l'utilisateur du tenant uniquement
+        $user->tenants()->detach($tenantId);
+
+        // Si l'utilisateur n'a plus aucun tenant, on peut le supprimer complètement (optionnel)
+        if ($user->tenants()->count() === 0) {
+            $user->delete();
+        }
+
+        return response()->json(['message' => 'Utilisateur supprimé avec succès.']);
+    }
 }
