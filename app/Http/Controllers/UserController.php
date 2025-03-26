@@ -31,7 +31,7 @@ class UserController
 
         tenancy()->end();
 
-        $limit = $request->get('limit', 1);
+        $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
 
         Log::debug('Pagination', ['page' => $page, 'limit' => $limit]);
