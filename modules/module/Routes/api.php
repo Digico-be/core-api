@@ -10,8 +10,11 @@ Route::group([
         Route::post('/modules/{module}/attach', [\Diji\Module\Http\Controllers\ModuleUserController::class, 'attach']);
         Route::post('/modules/{module}/detach', [\Diji\Module\Http\Controllers\ModuleUserController::class, 'detach']);
     });
+
+    Route::middleware(['auth:api'])->group(function(){
+        Route::resource("/modules", \Diji\Module\Http\Controllers\ModuleController::class)->only(['index']);
+    });
 });
 
-Route::resource("/modules", \Diji\Module\Http\Controllers\ModuleController::class)->only(['index']);
 
 
