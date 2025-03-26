@@ -6,8 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Stancl\Tenancy\Facades\Tenancy;
-
 
 class UserController
 {
@@ -38,7 +36,7 @@ class UserController
 
         Log::debug('Pagination', ['page' => $page, 'limit' => $limit]);
 
-        // ✅ Pagination SQL
+        // Pagination SQL
         $paginator = User::whereHas('tenants', function ($query) use ($tenantId) {
             $query->where('tenant_id', $tenantId);
         })
@@ -47,7 +45,7 @@ class UserController
             }])
             ->paginate($limit, ['*'], 'page', $page);
 
-        // ✅ Transformation propre des données paginées
+        // Transformation propre des données paginées
         $users = $paginator->getCollection()->map(function ($user) {
             $tenant = $user->tenants->first();
             return [
@@ -68,6 +66,10 @@ class UserController
                 'total' => $paginator->total(),
             ]
         ]);
+    }
+    public function show(User $user)
+    {
+        return response()->json($user);
     }
 
 }
