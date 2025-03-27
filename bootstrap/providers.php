@@ -7,5 +7,6 @@ return [
     Laravel\Passport\PassportServiceProvider::class,
     Barryvdh\DomPDF\ServiceProvider::class,
     \Diji\Billing\BillingServiceProvider::class,
-    \Diji\Contact\ContactServiceProvider::class
+    \Diji\Contact\ContactServiceProvider::class,
+    \Diji\Workspace\WorkspaceServiceProvider::class
 ];
