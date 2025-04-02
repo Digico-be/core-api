@@ -1,6 +1,6 @@
-# 🚀 Guide d'installation - Digico (Laravel API Multi-Tenant + Passport)
+# 🚀 Guide d'installation - Diji (Laravel API Multi-Tenant + Passport)
 
-Bienvenue dans le guide d’installation du projet **Digico**. Cette API Laravel utilise la gestion de tenants (multi-entreprises) avec le package `stancl/tenancy` et l’authentification via `laravel/passport`.
+Bienvenue dans le guide d’installation du projet **Diji**. Cette API Laravel utilise la gestion de tenants (multi-entreprises) avec le package `stancl/tenancy` et l’authentification via `laravel/passport`.
 
 ---
 
@@ -39,10 +39,10 @@ php artisan migrate
 ## 🏢 Étape 4 : Créer un tenant
 
 ```bash
-php artisan tenant:create nom_du_tenant
+php artisan tenant:create "Nom du Tenant"
 ```
 
-> Exemple : `php artisan tenant:create module`
+> Exemple : `php artisan tenant:create diji`
 
 ---
 
@@ -53,7 +53,7 @@ php artisan user:create email motdepasse slug_du_tenant
 ```
 
 > Exemple :  
-> `php artisan user:create jillian.rezette@gmail.com Module2025@ module`
+> `php artisan user:create in**@diji.be password tenant`
 
 ---
 
@@ -133,6 +133,6 @@ Dans le composer.json, ajouter le module dans autoload
 
 ---
 
-## 🎉 Tu es prêt à utiliser l'API Digico !
+## 🎉 Tu es prêt à utiliser l'API Diji !
 
 Utilise un outil comme Postman, Insomnia ou Thunder Client pour tester les endpoints sécurisés.
