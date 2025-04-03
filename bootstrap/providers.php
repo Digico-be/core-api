@@ -8,6 +8,6 @@ return [
     Barryvdh\DomPDF\ServiceProvider::class,
     \Diji\Billing\BillingServiceProvider::class,
     \Diji\Contact\ContactServiceProvider::class,
-    \Diji\Module\ModuleServiceProvider::class
-
+    \Diji\Module\ModuleServiceProvider::class,
+    \Diji\Workspace\WorkspaceServiceProvider::class
 ];

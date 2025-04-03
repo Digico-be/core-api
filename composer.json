@@ -27,7 +27,8 @@
             "App\\": "app/",
             "diji\\Billing\\": "modules/billing",
             "diji\\Contact\\": "modules/contact",
-            "diji\\Module\\": "modules/module"
+            "diji\\Module\\": "modules/module",
+            "diji\\Workspace\\": "modules/workspace"
         }
     },
     "autoload-dev": {
