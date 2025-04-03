@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Diji\Billing\Models\NordigenAccount;
 use Diji\Billing\Models\NordigenToken;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 
 class NordigenService
@@ -24,6 +25,8 @@ class NordigenService
         $this->nordigen_secret_key = Meta::getValue('nordigen_secret_key');
 
         if(!$this->nordigen_secret_id || !$this->nordigen_secret_key){
+            Log::channel('transaction')->info("Tenant : " . tenant()->name);
+            Log::channel('transaction')->info("Le compte n'est pas configuré correctement !");
             throw new \InvalidArgumentException("Le compte n'est pas configuré correctement !");
         }
 

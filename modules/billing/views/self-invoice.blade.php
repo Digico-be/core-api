@@ -3,7 +3,7 @@
 @section("content")
     <div>
         @if($logo)
-            <img style="width: 200px; margin-bottom:30px;" src={!! $logo !!} />
+            <img style="height: 120px; margin-bottom:30px;" src={!! $logo !!} />
         @endif
 
         <table style="width: 100%;">
@@ -23,7 +23,11 @@
                     </p>
 
                     @if(isset($issuer["vat_number"]))
-                        <p style="margin-top: 10px; font-size: 14px;">TVA {!! $issuer["vat_number"] !!}</p>
+                        <p style="margin-top: 10px; font-size: 14px;">TVA : {!! $issuer["vat_number"] !!}</p>
+                    @endif
+
+                    @if(isset($issuer["iban"]))
+                        <p style="margin-top: 10px; font-size: 14px;">CB/Compte banquaire : {!! $issuer["iban"] !!}</p>
                     @endif
 
                     <p style=" font-size: 14px;">
@@ -135,6 +139,13 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div style="margin-top: 100px;">
+            <p style="margin-top:10px; font-size: 14px;">
+                Le montant <strong>{!! \Diji\Billing\Helpers\PricingHelper::formatCurrency($total) !!}</strong> sera versé sur le compte <strong>{!! $issuer['iban'] !!}</strong> par <strong>{!! $recipient['name'] !!}</strong>
+            </p>
+            <p  style="margin-top:10px; font-size: 14px;">Merci de votre confiance !</p>
         </div>
 
     </div>

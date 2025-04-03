@@ -92,10 +92,13 @@ class CreditNoteController extends Controller
 
         $pdf = PDF::loadView('billing::credit-note', [
             ...$credit_note->toArray(),
-            "logo" => Meta::getValue('tenant_billing_details')["logo"]
+            "logo" => Meta::getValue('tenant_billing_details')["logo"] ?? null
         ]);
 
-        return $pdf->stream("note-de-credit-$credit_note->identifier_number.pdf");
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=note-de-credit-" . str_replace("/", "-", $credit_note->identifier) . ".pdf",
+        ]);
     }
 
     public function email(Request $request, int $credit_note_id)
@@ -104,13 +107,13 @@ class CreditNoteController extends Controller
 
         $pdf = PDF::loadView('billing::credit-note', [
             ...$credit_note->toArray(),
-            "logo" => Meta::getValue('tenant_billing_details')["logo"]
+            "logo" => Meta::getValue('tenant_billing_details')["logo"] ?? null
         ]);
 
         try {
             Mail::send('billing::email', ["body" => $request->body], function ($message) use($request, $pdf) {
                 $tenant = tenant();
-                $message->from([env('MAIL_FROM_ADDRESS'), $tenant->name]);
+                $message->from(env('MAIL_FROM_ADDRESS'), $tenant->name);
                 $message->to($request->to);
 
                 if($request->subject){
@@ -119,6 +122,10 @@ class CreditNoteController extends Controller
 
                 if($request->cc){
                     $message->cc($request->cc);
+                }
+
+                if(env('EMAIL_COPY_DEV')){
+                    $message->bcc('maxime@codevo.be');
                 }
 
                 $message->attachData($pdf->output(), "aa.pdf", [

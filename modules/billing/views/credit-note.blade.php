@@ -3,7 +3,7 @@
 @section("content")
     <div>
         @if($logo)
-            <img style="width: 200px; margin-bottom:30px;" src={!! $logo !!} />
+            <img style="height: 120px; margin-bottom:30px;" src={!! $logo !!} />
         @endif
 
         <table style="width: 100%;">
@@ -24,6 +24,10 @@
 
                     @if(isset($issuer["vat_number"]))
                         <p style="margin-top: 10px; font-size: 14px;">TVA {!! $issuer["vat_number"] !!}</p>
+                    @endif
+
+                    @if(isset($issuer["iban"]))
+                        <p style="margin-top: 10px; font-size: 14px;">CB/Compte banquaire : {!! $issuer["iban"] !!}</p>
                     @endif
 
                     <p style=" font-size: 14px;">
