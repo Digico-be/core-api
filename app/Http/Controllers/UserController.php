@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController
 {
     public function index(Request $request): JsonResponse
     {
-        Log::debug('Query Params test', $request->query());
-
         $tenantId = $request->header('X-Tenant');
 
         if (!$tenantId) {
@@ -33,8 +34,6 @@ class UserController
 
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-
-        Log::debug('Pagination', ['page' => $page, 'limit' => $limit]);
 
         // Pagination SQL
         $paginator = User::whereHas('tenants', function ($query) use ($tenantId) {
@@ -67,9 +66,34 @@ class UserController
             ]
         ]);
     }
-    public function show(User $user)
+    public function show(Request $request, User $user)
     {
-        return response()->json($user);
+        $tenantId = $request->header('X-Tenant');
+
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant manquant dans les en-têtes.'], 400);
+        }
+
+        $tenant = \App\Models\Tenant::find($tenantId);
+
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant introuvable.'], 404);
+        }
+
+        if (!$user->tenants->contains('id', $tenantId)) {
+            return response()->json(['message' => 'Cet utilisateur n\'appartient pas à ce tenant.'], 403);
+        }
+
+        $tenant = $user->tenants()->where('tenant_id', $tenantId)->first();
+        $role = $tenant?->pivot?->role;
+
+        return response()->json([
+            'id' => $user->id,
+            'firstname' => $user->firstname,
+            'lastname' => $user->lastname,
+            'email' => $user->email,
+            'role' => $role,
+        ]);
     }
 
     public function destroy(Request $request, User $user): JsonResponse
@@ -100,5 +124,63 @@ class UserController
         }
 
         return response()->json(['message' => 'Utilisateur supprimé avec succès.']);
+    }
+
+    public function update(Request $request, User $user): JsonResponse
+    {
+        $tenantId = $request->header('X-Tenant');
+
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant manquant dans les en-têtes.'], 400);
+        }
+
+        $tenant = \App\Models\Tenant::find($tenantId);
+
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant introuvable.'], 404);
+        }
+
+        if (!$user->tenants->contains('id', $tenantId)) {
+            return response()->json(['message' => 'Cet utilisateur n\'appartient pas à ce tenant.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|email',
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|in:guest,customer,personnal,admin',
+        ]);
+
+        // Vérification manuelle de l’unicité sur la connexion centrale
+        $exists = DB::connection('mysql')
+            ->table('users')
+            ->where('email', $request->input('email'))
+            ->where('id', '<>', $user->id)
+            ->exists();
+
+        if ($exists) {
+            $validator->errors()->add('email', 'Cet email est déjà utilisé par un autre utilisateur.');
+        }
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $validated = $validator->validated();
+
+        $user->update([
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'],
+            'email' => $validated['email'],
+            ...(isset($validated['password']) ? ['password' => bcrypt($validated['password'])] : []),
+        ]);
+
+        $user->tenants()->updateExistingPivot($tenantId, ['role' => $validated['role']]);
+
+        return response()->json([
+            'message' => 'Utilisateur mis à jour avec succès.',
+            'user' => $user->load(['tenants' => fn ($q) => $q->where('tenant_id', $tenantId)])
+        ]);
     }
 }
