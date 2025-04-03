@@ -145,22 +145,28 @@ class InvoiceController extends Controller
 
         $pdf = PDF::loadView('billing::invoice', [
             ...$invoice->toArray(),
-            "logo" => Meta::getValue('tenant_billing_details')["logo"]
+            "logo" => Meta::getValue('tenant_billing_details')['logo'] ?? null
         ]);
 
-        return $pdf->stream("invoice-$invoice->identifier_number.pdf");
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=facture-" . str_replace("/", "-", $invoice->identifier) . ".pdf",
+        ]);
     }
 
     public function email(Request $request, int $invoice_id)
     {
         $invoice = Invoice::findOrFail($invoice_id)->load('items');
 
-        $pdf = PDF::loadView('billing::invoice', $invoice->toArray());
+        $pdf = PDF::loadView('billing::invoice', [
+            ...$invoice->toArray(),
+            "logo" => Meta::getValue('tenant_billing_details')['logo'] ?? null
+        ]);
 
         try {
             Mail::send('billing::email', ["body" => $request->body], function ($message) use($request, $pdf) {
                 $tenant = tenant();
-                $message->from([env('MAIL_FROM_ADDRESS'), $tenant->name]);
+                $message->from(env('MAIL_FROM_ADDRESS'), $tenant->name);
                 $message->to($request->to);
 
                 if($request->subject){
@@ -169,6 +175,10 @@ class InvoiceController extends Controller
 
                 if($request->cc){
                     $message->cc($request->cc);
+                }
+
+                if(env('EMAIL_COPY_DEV')){
+                    $message->bcc('maxime@codevo.be');
                 }
 
                 $message->attachData($pdf->output(), "aa.pdf", [

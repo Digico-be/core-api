@@ -96,22 +96,28 @@ class SelfInvoiceController extends Controller
 
         $pdf = PDF::loadView('billing::self-invoice', [
             ...$self_invoice->toArray(),
-            "logo" => Meta::getValue('tenant_billing_details')["logo"]
+            "logo" => Meta::getValue('tenant_billing_details')["logo"] ?? null
         ]);
 
-        return $pdf->stream("autofacturation-$self_invoice->identifier_number.pdf");
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=autofacturation-" . str_replace("/", "-", $self_invoice->identifier) . ".pdf",
+        ]);
     }
 
     public function email(Request $request, int $self_invoice_id)
     {
         $self_invoice = SelfInvoice::findOrFail($self_invoice_id)->load('items');
 
-        $pdf = PDF::loadView('billing::self-invoice', $self_invoice->toArray());
+        $pdf = PDF::loadView('billing::self-invoice', [
+            ...$self_invoice->toArray(),
+            "logo" => Meta::getValue('tenant_billing_details')["logo"] ?? null
+        ]);
 
         try {
             Mail::send('billing::email', ["body" => $request->body], function ($message) use($request, $pdf) {
                 $tenant = tenant();
-                $message->from([env('MAIL_FROM_ADDRESS'), $tenant->name]);
+                $message->from(env('MAIL_FROM_ADDRESS'), $tenant->name);
                 $message->to($request->to);
 
                 if($request->subject){
@@ -120,6 +126,10 @@ class SelfInvoiceController extends Controller
 
                 if($request->cc){
                     $message->cc($request->cc);
+                }
+
+                if(env('EMAIL_COPY_DEV')){
+                    $message->bcc('maxime@codevo.be');
                 }
 
                 $message->attachData($pdf->output(), "aa.pdf", [
