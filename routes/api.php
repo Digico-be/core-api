@@ -14,6 +14,7 @@ Route::middleware(['auth:api','auth.tenant'])->prefix('auth')->group(function ()
 Route::middleware(['auth:api','auth.tenant'])->group(function () {
     Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
     Route::get('/users/{user}', [\App\Http\Controllers\UserController::class, 'show']);
+    Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy']);
 
     Route::resource('/metas', \App\Http\Controllers\MetaController::class)->only(["show","update"]);
     Route::resource('/uploads', \App\Http\Controllers\UploadController::class)->only('store');
