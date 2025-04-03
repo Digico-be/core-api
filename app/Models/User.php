@@ -50,6 +50,8 @@ class User extends Authenticatable
 
     public function tenants()
     {
-        return $this->belongsToMany(Tenant::class, 'user_tenants');
+        return $this->belongsToMany(Tenant::class, 'user_tenants')
+            ->withPivot('role')
+            ->withTimestamps();
     }
 }

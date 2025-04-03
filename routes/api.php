@@ -18,3 +18,7 @@ Route::middleware(['auth:api','auth.tenant'])->group(function () {
     Route::resource('/metas', \App\Http\Controllers\MetaController::class)->only(["show","update"]);
     Route::resource('/uploads', \App\Http\Controllers\UploadController::class)->only('store');
 });
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
+
+});

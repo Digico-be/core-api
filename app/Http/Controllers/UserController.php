@@ -11,8 +11,6 @@ class UserController
 {
     public function index(Request $request): JsonResponse
     {
-        Log::debug('Query Params test', $request->query());
-
         $tenantId = $request->header('X-Tenant');
 
         if (!$tenantId) {
@@ -72,4 +70,39 @@ class UserController
         return response()->json($user);
     }
 
+    public function store(Request $request): JsonResponse
+    {
+        $tenantId = $request->header('X-Tenant');
+
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant manquant dans les en-têtes.'], 400);
+        }
+
+        $tenant = \App\Models\Tenant::where('id', $tenantId)->first();
+
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant introuvable.'], 404);
+        }
+
+        $validated = $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:guest,customer,personnal,admin',
+        ]);
+
+        // Création de l'utilisateur
+        $user = \App\Models\User::create([
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        // Liaison avec le tenant + rôle
+        $user->tenants()->attach($tenantId, ['role' => $validated['role']]);
+
+        return response()->json(['message' => 'Utilisateur créé avec succès.', 'user' => $user], 201);
+    }
 }
