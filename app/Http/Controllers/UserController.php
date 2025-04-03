@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class UserController
             ], 400);
         }
 
-        $tenant = \App\Models\Tenant::where('id', $tenantId)->first();
+        $tenant = \App\Models\Tenant::find($tenantId);
 
         if (!$tenant) {
             return response()->json([
@@ -35,7 +36,6 @@ class UserController
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
 
-        // Pagination SQL
         $paginator = User::whereHas('tenants', function ($query) use ($tenantId) {
             $query->where('tenant_id', $tenantId);
         })
@@ -44,21 +44,9 @@ class UserController
             }])
             ->paginate($limit, ['*'], 'page', $page);
 
-        // Transformation propre des données paginées
-        $users = $paginator->getCollection()->map(function ($user) {
-            $tenant = $user->tenants->first();
-            return [
-                'id' => $user->id,
-                'firstname' => $user->firstname,
-                'lastname' => $user->lastname,
-                'email' => $user->email,
-                'role' => $tenant?->pivot->role,
-            ];
-        });
-
         return response()->json([
             'data' => [
-                'users' => $users,
+                'users' => UserResource::collection($paginator->getCollection()),
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'per_page' => $paginator->perPage(),
@@ -74,7 +62,7 @@ class UserController
             return response()->json(['message' => 'Tenant manquant dans les en-têtes.'], 400);
         }
 
-        $tenant = \App\Models\Tenant::find($tenantId);
+        $tenant = \App\Models\Tenant::where('id', $tenantId)->first();
 
         if (!$tenant) {
             return response()->json(['message' => 'Tenant introuvable.'], 404);
@@ -84,16 +72,7 @@ class UserController
             return response()->json(['message' => 'Cet utilisateur n\'appartient pas à ce tenant.'], 403);
         }
 
-        $tenant = $user->tenants()->where('tenant_id', $tenantId)->first();
-        $role = $tenant?->pivot?->role;
-
-        return response()->json([
-            'id' => $user->id,
-            'firstname' => $user->firstname,
-            'lastname' => $user->lastname,
-            'email' => $user->email,
-            'role' => $role,
-        ]);
+        return new UserResource($user->load(['tenants' => fn ($q) => $q->where('tenant_id', $tenantId)]));
     }
 
     public function destroy(Request $request, User $user): JsonResponse
