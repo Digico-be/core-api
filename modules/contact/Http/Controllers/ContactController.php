@@ -57,8 +57,10 @@ class ContactController extends Controller
     }
 
 
-    public function destroy(Contact $contact): \Illuminate\Http\Response
+    public function destroy(int $contact_id): \Illuminate\Http\Response
     {
+        $contact = Contact::find($contact_id);
+
         $contact->delete();
 
         return response()->noContent();
