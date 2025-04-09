@@ -47,6 +47,11 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->firstOrFail();
 
+            $tenant = $user->tenants->first();
+            if (!$tenant) {
+                return response()->json(['message' => 'Aucun tenant associé à cet utilisateur.'], 400);
+            }
+
             return response()->json([
                 "data" => [
                     'token_type' => 'Bearer',
