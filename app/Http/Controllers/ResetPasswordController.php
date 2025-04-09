@@ -38,13 +38,18 @@ class ResetPasswordController extends Controller
                 'token'    => 'required',
                 'email'    => 'required|email',
                 'password' => 'required|confirmed|min:8',
+            ], [
+                'token.required'    => 'Le token est manquant.',
+                'email.required'    => 'L\'adresse email est requise.',
+                'email.email'       => 'Le format de l\'adresse email est invalide.',
+                'password.required' => 'Le mot de passe est obligatoire.',
+                'password.confirmed'=> 'La confirmation du mot de passe ne correspond pas.',
+                'password.min'      => 'Le mot de passe doit comporter au moins 8 caractères.',
             ]);
         } catch (ValidationException $e) {
-            // Logguez les erreurs pour le debug
             Log::error('Validation failed for password reset', $e->errors());
-            // Retournez les erreurs
             return response()->json([
-                'message' => 'Validation error',
+                'message' => 'Erreur de validation',
                 'errors' => $e->errors(),
             ], 422);
         }
@@ -63,11 +68,11 @@ class ResetPasswordController extends Controller
                 'message' => 'Mot de passe réinitialisé avec succès.'
             ], 200);
         } else {
-            // Vous pouvez également détailler l'erreur si souhaité.
             return response()->json([
-                'message' => __($status)
+                'message' => __('Une erreur est survenue lors de la réinitialisation du mot de passe.')
             ], 400);
         }
     }
+
 
 }
