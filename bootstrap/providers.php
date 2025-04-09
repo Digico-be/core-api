@@ -9,5 +9,5 @@ return [
     \Diji\Billing\BillingServiceProvider::class,
     \Diji\Contact\ContactServiceProvider::class,
     \Diji\Module\ModuleServiceProvider::class,
-    \Diji\Workspace\WorkspaceServiceProvider::class
+    \Diji\User\UserServiceProvider::class
 ];

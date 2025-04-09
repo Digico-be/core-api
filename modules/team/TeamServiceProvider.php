@@ -1,10 +1,10 @@
 <?php
 
-namespace Diji\Workspace;
+namespace Diji\Team;
 
 use Illuminate\Support\ServiceProvider;
 
-class WorkspaceServiceProvider extends ServiceProvider
+class TeamServiceProvider extends ServiceProvider
 {
     public function register()
     {

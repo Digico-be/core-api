@@ -28,7 +28,7 @@
             "diji\\Billing\\": "modules/billing",
             "diji\\Contact\\": "modules/contact",
             "diji\\Module\\": "modules/module",
-            "diji\\Workspace\\": "modules/workspace"
+            "diji\\Team\\": "modules/team"
         }
     },
     "autoload-dev": {
