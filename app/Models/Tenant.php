@@ -16,9 +16,4 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     {
         return ['id', 'name'];
     }
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'user_tenants');
-    }
 }
