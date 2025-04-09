@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('modules_users', function (Blueprint $table) {
+        Schema::create('tenant_modules', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('tenant_id');
             $table->unsignedBigInteger('module_id');
             $table->timestamps();
 
-            $table->index('user_id');
+            $table->index('tenant_id');
             $table->index('module_id');
         });
 
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('modules_users');
+        Schema::dropIfExists('tenant_modules');
     }
 };
