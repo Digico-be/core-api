@@ -13,6 +13,11 @@ Route::group([
 
         // Optionnel : Pour obtenir tous les assistants associés au tenant
         Route::get('/assistants', [\Diji\Ia\Http\Controllers\AssistantController::class, 'index']);
+
+
+        Route::resource('/threads', \Diji\Ia\Http\Controllers\ThreadController::class)->only([
+            'store', 'show', 'destroy'
+        ]);
     });
 });
 
