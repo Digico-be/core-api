@@ -10,7 +10,8 @@ return new class extends Migration
     {
         // Création de la table 'assistants'
         Schema::create('assistants', function (Blueprint $table) {
-            $table->id();  // Cette ligne crée une colonne 'id' auto-incrémentée
+            $table->id();
+            $table->string('openai_id')->unique();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('module');

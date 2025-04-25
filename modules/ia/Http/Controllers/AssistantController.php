@@ -39,6 +39,7 @@ class AssistantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'openai_id' => 'required|string|unique:assistants,openai_id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'module' => 'required|string',
@@ -55,6 +56,7 @@ class AssistantController extends Controller
 
         // Créer l'assistant
         $assistant = Assistant::create([
+            'openai_id' => $request->openai_id,
             'name' => $request->name,
             'description' => $request->description,
             'module' => $request->module,
@@ -87,22 +89,20 @@ class AssistantController extends Controller
     /**
      * Afficher un assistant spécifique.
      */
-    public function show($id)
+    public function show($openaiId)
     {
-        // Recherche du tenant dans la base principale (mysql)
         $userTenant = DB::connection('mysql')->table('user_tenants')
-            ->where('user_id', auth()->user()->id)  // Utilise l'ID de l'utilisateur pour récupérer son tenant
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$userTenant) {
             return response()->json(['message' => 'Tenant not found'], 404);
         }
 
-        // Récupérer l'assistant spécifique via la table de relation 'assistant_user_tenant'
         $assistant = DB::connection('tenant')->table('assistant_user_tenant')
             ->join('assistants', 'assistant_user_tenant.assistant_id', '=', 'assistants.id')
             ->where('assistant_user_tenant.user_tenant_id', $userTenant->id)
-            ->where('assistants.id', $id)  // Trouver l'assistant par son ID
+            ->where('assistants.openai_id', $openaiId)
             ->select('assistants.*')
             ->first();
 
@@ -116,22 +116,20 @@ class AssistantController extends Controller
     /**
      * Mettre à jour un assistant spécifique.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $openaiId)
     {
-        // Recherche du tenant dans la base principale (mysql)
         $userTenant = DB::connection('mysql')->table('user_tenants')
-            ->where('user_id', auth()->user()->id)  // Utilise l'ID de l'utilisateur pour récupérer son tenant
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$userTenant) {
             return response()->json(['message' => 'Tenant not found'], 404);
         }
 
-        // Récupérer l'assistant spécifique via la table de relation 'assistant_user_tenant'
         $assistant = DB::connection('tenant')->table('assistant_user_tenant')
             ->join('assistants', 'assistant_user_tenant.assistant_id', '=', 'assistants.id')
             ->where('assistant_user_tenant.user_tenant_id', $userTenant->id)
-            ->where('assistants.id', $id)  // Trouver l'assistant par son ID
+            ->where('assistants.openai_id', $openaiId)
             ->select('assistants.*')
             ->first();
 
@@ -139,7 +137,6 @@ class AssistantController extends Controller
             return response()->json(['message' => 'Assistant not found'], 404);
         }
 
-        // Valider les données de la requête
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -148,9 +145,8 @@ class AssistantController extends Controller
             'instructions' => 'nullable|string',
         ]);
 
-        // Mettre à jour l'assistant avec les nouvelles données
-        $updatedAssistant = DB::connection('tenant')->table('assistants')
-            ->where('id', $id)
+        $updated = DB::connection('tenant')->table('assistants')
+            ->where('openai_id', $openaiId)
             ->update([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -160,7 +156,7 @@ class AssistantController extends Controller
                 'updated_at' => now(),
             ]);
 
-        if ($updatedAssistant) {
+        if ($updated) {
             return response()->json(['message' => 'Assistant updated successfully']);
         }
 
@@ -170,22 +166,20 @@ class AssistantController extends Controller
     /**
      * Supprimer un assistant spécifique.
      */
-    public function destroy($id)
+    public function destroy($openaiId)
     {
-        // Recherche du tenant dans la base principale (mysql)
         $userTenant = DB::connection('mysql')->table('user_tenants')
-            ->where('user_id', auth()->user()->id)  // Utilise l'ID de l'utilisateur pour récupérer son tenant
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$userTenant) {
             return response()->json(['message' => 'Tenant not found'], 404);
         }
 
-        // Récupérer l'assistant spécifique via la table de relation 'assistant_user_tenant'
         $assistant = DB::connection('tenant')->table('assistant_user_tenant')
             ->join('assistants', 'assistant_user_tenant.assistant_id', '=', 'assistants.id')
             ->where('assistant_user_tenant.user_tenant_id', $userTenant->id)
-            ->where('assistants.id', $id)  // Trouver l'assistant par son ID
+            ->where('assistants.openai_id', $openaiId) // ✅ Changement ici
             ->select('assistants.*')
             ->first();
 
@@ -193,13 +187,13 @@ class AssistantController extends Controller
             return response()->json(['message' => 'Assistant not found'], 404);
         }
 
-        // Supprimer l'assistant de la table 'assistants'
-        $deleted = DB::connection('tenant')->table('assistants')->where('id', $id)->delete();
+        $deleted = DB::connection('tenant')->table('assistants')
+            ->where('openai_id', $openaiId)
+            ->delete();
 
         if ($deleted) {
-            // Supprimer également l'association dans la table pivot 'assistant_user_tenant'
             DB::connection('tenant')->table('assistant_user_tenant')
-                ->where('assistant_id', $id)
+                ->where('assistant_id', $assistant->id)
                 ->where('user_tenant_id', $userTenant->id)
                 ->delete();
 

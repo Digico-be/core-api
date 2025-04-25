@@ -8,11 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Assistant extends Model
 {
     protected $fillable = [
-        'name',
-        'description',
-        'module',
-        'model',
-        'instructions',
+        'openai_id', 'name', 'description', 'module', 'model', 'instructions',
     ];
 
     /**
