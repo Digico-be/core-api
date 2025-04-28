@@ -14,6 +14,7 @@ Route::group([
         // Optionnel : Pour obtenir tous les assistants associés au tenant
         Route::get('/assistants', [\Diji\Ia\Http\Controllers\AssistantController::class, 'index']);
 
+        Route::get('/threads/find', [\Diji\Ia\Http\Controllers\ThreadController::class, 'find']);
 
         Route::resource('/threads', \Diji\Ia\Http\Controllers\ThreadController::class)->only([
             'store', 'show', 'destroy'

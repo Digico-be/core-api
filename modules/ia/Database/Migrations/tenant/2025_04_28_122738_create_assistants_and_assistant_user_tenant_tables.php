@@ -20,14 +20,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Création de la table de relation 'assistant_user_tenant'
+        // Création de la table de pivot 'assistant_user_tenant'
         Schema::create('assistant_user_tenant', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('assistant_id');  // ID de l'assistant
-            $table->unsignedBigInteger('user_tenant_id');  // ID du tenant utilisateur
+            $table->unsignedBigInteger('assistant_id');
+            $table->unsignedBigInteger('user_tenant_id');
             $table->timestamps();
 
-            // Indexes pour les relations
+            // Indexes pour optimiser les relations
             $table->index('assistant_id');
             $table->index('user_tenant_id');
         });
@@ -35,9 +35,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Suppression des tables dans l'ordre inverse
+        // Suppression dans l'ordre inverse de création
         Schema::dropIfExists('assistant_user_tenant');
         Schema::dropIfExists('assistants');
     }
 };
-
