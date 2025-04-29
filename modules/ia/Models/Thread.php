@@ -2,7 +2,6 @@
 
 namespace Diji\Ia\Models;
 
-use App\Models\UserTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
