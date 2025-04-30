@@ -48,5 +48,9 @@ Route::group(
         */
         Route::apiResource('file-messages', FileMessageController::class)
             ->only(['index', 'store']);
+
+        Route::delete('/file-messages/message/{messageId}', [FileMessageController::class, 'destroyByMessage']);
+
+
     }
 );
