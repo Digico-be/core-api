@@ -42,9 +42,15 @@ class AssistantController extends Controller
             'openai_id' => 'required|string|unique:assistants,openai_id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'module' => 'required|string',
+            'module' => 'nullable|string',
+            'type' => 'required|in:general,specialized',
             'model' => 'nullable|string',
             'instructions' => 'nullable|string',
+            'temperature' => 'nullable|numeric|between:0,2',
+            'max_tokens_output' => 'nullable|integer|min:1',
+            'rules' => 'nullable|array',
+            'persona' => 'nullable|string',
+            'suggested_prompts' => 'nullable|array',
         ]);
 
         // Récupérer l'utilisateur authentifié via le token JWT
@@ -60,8 +66,14 @@ class AssistantController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'module' => $request->module,
+            'type' => $request->type,
             'model' => $request->model,
             'instructions' => $request->instructions,
+            'temperature' => $request->temperature ?? 0.7,
+            'max_tokens_output' => $request->max_tokens_output,
+            'rules' => $request->rules,
+            'persona' => $request->persona,
+            'suggested_prompts' => $request->suggested_prompts,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -140,9 +152,15 @@ class AssistantController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'module' => 'required|string',
+            'module' => 'nullable|string',
+            'type' => 'required|in:general,specialized',
             'model' => 'nullable|string',
             'instructions' => 'nullable|string',
+            'temperature' => 'nullable|numeric|between:0,2',
+            'max_tokens_output' => 'nullable|integer|min:1',
+            'rules' => 'nullable|array',
+            'persona' => 'nullable|string',
+            'suggested_prompts' => 'nullable|array',
         ]);
 
         $updated = DB::connection('tenant')->table('assistants')
@@ -151,8 +169,14 @@ class AssistantController extends Controller
                 'name' => $request->name,
                 'description' => $request->description,
                 'module' => $request->module,
+                'type' => $request->type,
                 'model' => $request->model,
                 'instructions' => $request->instructions,
+                'temperature' => $request->temperature ?? 0.7,
+                'max_tokens_output' => $request->max_tokens_output,
+                'rules' => $request->rules,
+                'persona' => $request->persona,
+                'suggested_prompts' => $request->suggested_prompts,
                 'updated_at' => now(),
             ]);
 
