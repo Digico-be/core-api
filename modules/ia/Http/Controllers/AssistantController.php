@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Diji\Ia\Models\Assistant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AssistantController extends Controller
 {
@@ -38,13 +39,22 @@ class AssistantController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('[AssistantController] Données reçues :', $request->all());
+
         $request->validate([
             'openai_id' => 'required|string|unique:assistants,openai_id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'module' => 'required|string',
+            'module' => 'nullable|string',
+            'type' => 'required|in:general,specialized',
             'model' => 'nullable|string',
             'instructions' => 'nullable|string',
+            'temperature' => 'nullable|numeric|between:0,2',
+            'max_tokens_output' => 'nullable|integer|min:1',
+            'rules' => 'nullable|array',
+            'persona' => 'nullable|string',
+            'suggested_prompts' => 'nullable|array',
+            'tools' => 'nullable|array',
         ]);
 
         // Récupérer l'utilisateur authentifié via le token JWT
@@ -60,8 +70,15 @@ class AssistantController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'module' => $request->module,
+            'type' => $request->type,
             'model' => $request->model,
             'instructions' => $request->instructions,
+            'temperature' => $request->temperature ?? 0.7,
+            'max_tokens_output' => $request->max_tokens_output,
+            'rules' => $request->rules,
+            'persona' => $request->persona,
+            'suggested_prompts' => $request->suggested_prompts,
+            'tools' => $request->tools,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -140,9 +157,15 @@ class AssistantController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'module' => 'required|string',
+            'module' => 'nullable|string',
+            'type' => 'required|in:general,specialized',
             'model' => 'nullable|string',
             'instructions' => 'nullable|string',
+            'temperature' => 'nullable|numeric|between:0,2',
+            'max_tokens_output' => 'nullable|integer|min:1',
+            'rules' => 'nullable|array',
+            'persona' => 'nullable|string',
+            'suggested_prompts' => 'nullable|array',
         ]);
 
         $updated = DB::connection('tenant')->table('assistants')
@@ -151,8 +174,14 @@ class AssistantController extends Controller
                 'name' => $request->name,
                 'description' => $request->description,
                 'module' => $request->module,
+                'type' => $request->type,
                 'model' => $request->model,
                 'instructions' => $request->instructions,
+                'temperature' => $request->temperature ?? 0.7,
+                'max_tokens_output' => $request->max_tokens_output,
+                'rules' => $request->rules,
+                'persona' => $request->persona,
+                'suggested_prompts' => $request->suggested_prompts,
                 'updated_at' => now(),
             ]);
 

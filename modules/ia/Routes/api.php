@@ -30,7 +30,7 @@ Route::group(
         */
         Route::get('threads/find', [ThreadController::class, 'find']);
         Route::resource('threads', ThreadController::class)
-            ->only(['store', 'show', 'destroy']);
+            ->only(['index', 'store', 'show', 'destroy']);
 
         /*
         |--------------------------------------------------------------------------
@@ -50,7 +50,6 @@ Route::group(
             ->only(['index', 'store']);
 
         Route::delete('/file-messages/message/{messageId}', [FileMessageController::class, 'destroyByMessage']);
-
 
     }
 );

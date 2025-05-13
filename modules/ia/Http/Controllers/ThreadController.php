@@ -96,5 +96,36 @@ class ThreadController extends Controller
 
         return response()->json($thread);
     }
+    /* --------------------------------------------------------------------------
+    |  Lister tous les threads pour un assistant (+ module optionnel)
+    |  GET /api/threads?assistant_openai_id=…&module=…
+    |--------------------------------------------------------------------------
+    */
+    public function index(Request $request)
+    {
+        $request->validate([
+            'assistant_openai_id' => 'required|string',
+            'module'              => 'nullable|string',
+        ]);
+
+        $assistant = \Diji\Ia\Models\Assistant::on('tenant')
+            ->where('openai_id', $request->assistant_openai_id)
+            ->first();
+
+        if (!$assistant) {
+            return response()->json(['message' => 'Assistant not found'], 404);
+        }
+
+        $query = \Diji\Ia\Models\Thread::on('tenant')
+            ->where('assistant_id', $assistant->id)
+            ->orderByDesc('created_at');
+
+        if ($request->filled('module')) {
+            $query->where('module', $request->module);
+        }
+
+        return response()->json($query->get());
+    }
+
 
 }
