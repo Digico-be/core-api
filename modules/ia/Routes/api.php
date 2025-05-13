@@ -1,5 +1,6 @@
 <?php
 
+use Diji\Ia\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 use Diji\Ia\Http\Controllers\AssistantController;
 use Diji\Ia\Http\Controllers\ThreadController;
@@ -50,6 +51,9 @@ Route::group(
             ->only(['index', 'store']);
 
         Route::delete('/file-messages/message/{messageId}', [FileMessageController::class, 'destroyByMessage']);
+
+        Route::apiResource('messages', MessageController::class)
+            ->only(['index', 'store']);
 
     }
 );

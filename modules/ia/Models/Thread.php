@@ -16,4 +16,9 @@ class Thread extends Model
     {
         return $this->belongsTo(Assistant::class);
     }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }
