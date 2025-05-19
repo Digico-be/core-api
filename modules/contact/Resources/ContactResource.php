@@ -25,6 +25,7 @@ class ContactResource extends JsonResource
             'company_name'              => $this->company_name,
             'vat_number'                => $this->vat_number,
             'billing_address'           => $this->billing_address,
+            'created_at'                => $this->created_at,
         ];
     }
 }
